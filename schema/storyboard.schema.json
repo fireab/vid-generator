@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://heritage-short/storyboard.schema.json",
+  "title": "Heritage Short Storyboard",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["title", "style_block", "character_description", "language", "tts_voice", "tts_style", "music_cue", "shots"],
+  "properties": {
+    "title": {"type": "string", "minLength": 1},
+    "style_block": {"type": "string", "minLength": 1, "description": "Visual style appended to every image prompt."},
+    "character_description": {"type": "string", "minLength": 1, "description": "Canonical character description for consistency."},
+    "language": {"type": "string", "minLength": 2, "description": "BCP-47 language code of narration, e.g. 'am-ET' or 'en-US'."},
+    "tts_voice": {"type": "string", "minLength": 1, "description": "Gemini prebuilt voice name, e.g. 'Kore'."},
+    "tts_style": {"type": "string", "minLength": 1, "description": "Natural-language delivery direction for TTS."},
+    "music_cue": {"type": "string", "minLength": 1, "description": "Prompt / description for the score."},
+    "shots": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/shot"}
+    }
+  },
+  "$defs": {
+    "shot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "reason", "duration_sec", "narration_text", "subtitle_en", "image_prompt", "motion_prompt", "motion_mode", "seed"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+        "reason": {"type": "string", "minLength": 1, "description": "Why this shot exists in the story."},
+        "duration_sec": {"type": "number", "exclusiveMinimum": 0, "maximum": 30},
+        "narration_text": {"type": "string"},
+        "subtitle_en": {"type": "string"},
+        "image_prompt": {"type": "string", "minLength": 1},
+        "motion_prompt": {"type": "string", "minLength": 1},
+        "motion_mode": {"enum": ["wan", "ken_burns"]},
+        "seed": {"type": "integer", "minimum": 0, "maximum": 4294967295}
+      }
+    }
+  }
+}

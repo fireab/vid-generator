@@ -1,0 +1,11 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+*.tmp
+*.tmp.wav
+*.swp
+.DS_Store
+outputs/*
+!outputs/.gitkeep
+runs.jsonl

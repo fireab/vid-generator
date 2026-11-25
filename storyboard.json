@@ -1,0 +1,19 @@
+{
+  "title": "The Heritage Short",
+  "style_block": "cinematic 35mm film still, warm golden-hour light, shallow depth of field, rich earthy palette, subtle film grain, 16:9",
+  "character_description": "TODO: an elderly grandmother in her 70s, silver hair under a white cotton shawl, kind deep-set eyes, weathered hands",
+  "language": "en-US",
+  "tts_voice": "Kore",
+  "tts_style": "Speak slowly and warmly, like a grandparent telling a cherished family story by the fire.",
+  "music_cue": "TODO: gentle traditional strings and soft percussion, nostalgic, building slightly toward the end",
+  "shots": [
+    {"id": "shot_01", "reason": "TODO: establish place and mood", "duration_sec": 6, "narration_text": "TODO: Opening line of narration for shot one.", "subtitle_en": "TODO: Opening line of narration for shot one.", "image_prompt": "TODO: wide establishing shot of a highland village at dawn", "motion_prompt": "slow push-in", "motion_mode": "ken_burns", "seed": 1001},
+    {"id": "shot_02", "reason": "TODO: introduce the protagonist", "duration_sec": 6, "narration_text": "TODO: Narration for shot two.", "subtitle_en": "TODO: Narration for shot two.", "image_prompt": "TODO: medium shot of the grandmother", "motion_prompt": "subtle head turn toward camera", "motion_mode": "wan", "seed": 1002},
+    {"id": "shot_03", "reason": "TODO: reveal the heirloom", "duration_sec": 6, "narration_text": "TODO: Narration for shot three.", "subtitle_en": "TODO: Narration for shot three.", "image_prompt": "TODO: close-up of hands holding an heirloom", "motion_prompt": "slow tilt down", "motion_mode": "ken_burns", "seed": 1003},
+    {"id": "shot_04", "reason": "TODO: flashback begins", "duration_sec": 6, "narration_text": "TODO: Narration for shot four.", "subtitle_en": "TODO: Narration for shot four.", "image_prompt": "TODO: memory scene, younger self", "motion_prompt": "gentle camera drift left", "motion_mode": "wan", "seed": 1004},
+    {"id": "shot_05", "reason": "TODO: conflict or hardship", "duration_sec": 6, "narration_text": "TODO: Narration for shot five.", "subtitle_en": "TODO: Narration for shot five.", "image_prompt": "TODO: dramatic scene of hardship", "motion_prompt": "slow pull-out", "motion_mode": "ken_burns", "seed": 1005},
+    {"id": "shot_06", "reason": "TODO: turning point", "duration_sec": 6, "narration_text": "TODO: Narration for shot six.", "subtitle_en": "TODO: Narration for shot six.", "image_prompt": "TODO: hopeful turning point", "motion_prompt": "figure walks forward", "motion_mode": "wan", "seed": 1006},
+    {"id": "shot_07", "reason": "TODO: return to present, passing on heritage", "duration_sec": 6, "narration_text": "TODO: Narration for shot seven.", "subtitle_en": "TODO: Narration for shot seven.", "image_prompt": "TODO: grandmother hands heirloom to grandchild", "motion_prompt": "slow push-in on hands", "motion_mode": "wan", "seed": 1007},
+    {"id": "shot_08", "reason": "TODO: closing image and message", "duration_sec": 6, "narration_text": "TODO: Closing line of narration.", "subtitle_en": "TODO: Closing line of narration.", "image_prompt": "TODO: village at dusk, closing wide", "motion_prompt": "slow pull-out", "motion_mode": "ken_burns", "seed": 1008}
+  ]
+}
