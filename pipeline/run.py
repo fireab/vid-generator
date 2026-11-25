@@ -33,20 +33,17 @@ def main(argv=None) -> int:
         return 0
 
     only = set(a.shots) if a.shots else None
+    music_path = a.music
     for stage in (RADIO_STAGES if a.mode == "radio" else FILM_STAGES):
         print(f"== {stage}")
-        if stage == "narration":
-            import narration
-            narration.run(sb, only)
-        elif stage == "assemble":
+        if stage == "assemble":
             import assemble
-            if a.mode == "radio":
-                assemble.radio(sb, a.music)
-            else:
-                assemble.main(["--mode", "film"])
+            (assemble.radio if a.mode == "radio" else assemble.film)(sb, music_path)
+        elif stage == "music":
+            import music
+            music_path = music_path or music.run(sb)
         else:
-            mod = __import__(stage)
-            mod.run(sb, only)
+            __import__(stage).run(sb, only)
     return 0
 
 

@@ -19,3 +19,20 @@ film:
 
 clean-cache:
 	rm -f outputs/.cache_manifest.json
+
+.PHONY: keyframes shots music notebook merge-kaggle
+
+keyframes:
+	$(PY) pipeline/keyframes.py
+
+shots:
+	$(PY) pipeline/shots.py
+
+music:
+	$(PY) pipeline/music.py
+
+notebook:
+	$(PY) notebooks/build_notebook.py
+
+merge-kaggle:
+	$(PY) pipeline/merge_kaggle_log.py $(LOG)

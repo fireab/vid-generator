@@ -25,8 +25,7 @@ def shot_inputs(sb: dict, shot: dict) -> dict:
     }
 
 
-def narration_path(shot_id: str) -> Path:
-    return OUT_DIR / f"{shot_id}.wav"
+from media import narration_path  # noqa: E402,F401  (re-exported)
 
 
 def run(sb: dict | None = None, only: set[str] | None = None) -> dict[str, Path]:
