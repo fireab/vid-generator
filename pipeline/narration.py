@@ -1,11 +1,13 @@
 """Narration stage: one TTS WAV per shot, cached by input hash.
 
 Primary backend: Gemini TTS (`gemini-2.5-flash-preview-tts`).
-Automatic fallback on daily quota exhaustion (or when TTS_BACKEND=cloudflare):
-Cloudflare Workers AI Deepgram Aura-1 (`@cf/deepgram/aura-1`).
+Automatic fallback on daily quota exhaustion:
+- Amharic / non-English (`language` starting with 'am', etc.): `edge-tts` (`am-ET-MekdesNeural`).
+- English (`language` starting with 'en'): Cloudflare Workers AI Deepgram Aura-1 (`@cf/deepgram/aura-1`).
 """
 from __future__ import annotations
 
+import asyncio
 import os
 import sys
 from pathlib import Path
@@ -20,9 +22,46 @@ from utils import (OUTPUTS, Timer, cache_lookup, cache_store, input_hash, load_e
 STAGE = "narration"
 OUT_DIR = OUTPUTS / "narration"
 CF_TTS_MODEL = "@cf/deepgram/aura-1"
-CF_TTS_SPEAKER = os.environ.get("CF_TTS_SPEAKER", "luna")  # warm, calm female narrator
+CF_TTS_SPEAKER = os.environ.get("CF_TTS_SPEAKER", "luna")
+EDGE_TTS_MODEL = "edge-tts"
+EDGE_AM_VOICE = os.environ.get("EDGE_TTS_VOICE", "am-ET-MekdesNeural")
+EDGE_EN_VOICE = os.environ.get("EDGE_TTS_EN_VOICE", "en-US-AriaNeural")
 # Rough estimate: Gemini 2.5 Flash TTS ~ $10 / 1M audio output tokens, ~25 tokens/sec audio.
 USD_PER_AUDIO_SEC = 25 * 10 / 1_000_000
+
+
+def _fallback_model_for(sb: dict) -> tuple[str, str]:
+    """Return (model_name, voice_or_speaker) for the language-aware fallback TTS."""
+    lang = sb.get("language", "en").lower()
+    backend = os.environ.get("TTS_BACKEND", "").lower()
+    if backend == "cloudflare":
+        return CF_TTS_MODEL, CF_TTS_SPEAKER
+    if backend == "edge" or not lang.startswith("en"):
+        voice = EDGE_AM_VOICE if lang.startswith("am") else EDGE_EN_VOICE
+        return EDGE_TTS_MODEL, voice
+    return CF_TTS_MODEL, CF_TTS_SPEAKER
+
+
+def _edge_tts_to_wav(text: str, voice: str, out_path: Path) -> float:
+    """Synthesize `text` via Microsoft Edge Neural TTS (`edge-tts`) into a 24kHz mono WAV."""
+    import edge_tts
+
+    require_ffmpeg()
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    raw = out_path.with_suffix(".tmp.mp3")
+    tmp = out_path.with_suffix(".tmp.wav")
+
+    async def _save() -> None:
+        comm = edge_tts.Communicate(text, voice)
+        await comm.save(str(raw))
+
+    asyncio.run(_save())
+    if not raw.exists() or raw.stat().st_size == 0:
+        raise RuntimeError(f"edge-tts ({voice}) produced empty audio")
+    ffmpeg(["-i", str(raw), "-ac", "1", "-ar", str(SAMPLE_RATE), "-c:a", "pcm_s16le", str(tmp)])
+    raw.unlink(missing_ok=True)
+    tmp.replace(out_path)
+    return wav_duration(out_path)
 
 
 def _cf_tts_to_wav(text: str, speaker: str, out_path: Path) -> float:
@@ -45,13 +84,13 @@ def _cf_tts_to_wav(text: str, speaker: str, out_path: Path) -> float:
     return wav_duration(out_path)
 
 
-def shot_inputs(sb: dict, shot: dict, model: str = TTS_MODEL) -> dict:
-    if model == CF_TTS_MODEL:
+def shot_inputs(sb: dict, shot: dict, model: str = TTS_MODEL, voice_override: str | None = None) -> dict:
+    if model != TTS_MODEL:
         return {
             "stage": STAGE,
-            "model": CF_TTS_MODEL,
+            "model": model,
             "text": shot["narration_text"],
-            "speaker": CF_TTS_SPEAKER,
+            "voice": voice_override or "",
             "language": sb["language"],
         }
     return {
@@ -73,7 +112,8 @@ def run(sb: dict | None = None, only: set[str] | None = None) -> dict[str, Path]
     load_env()
     sb = sb or validate_storyboard()
     client = None
-    use_cf = os.environ.get("TTS_BACKEND", "").lower() == "cloudflare"
+    fb_model, fb_voice = _fallback_model_for(sb)
+    use_fallback = os.environ.get("TTS_BACKEND", "").lower() in ("cloudflare", "edge")
     results: dict[str, Path] = {}
     for shot in sb["shots"]:
         sid = shot["id"]
@@ -83,16 +123,16 @@ def run(sb: dict | None = None, only: set[str] | None = None) -> dict[str, Path]
             print(f"  [skip] {sid}: empty narration")
             continue
 
-        # Check cache for preferred backend first (and fallback backend if already cached).
-        active_model = CF_TTS_MODEL if use_cf else TTS_MODEL
-        inputs = shot_inputs(sb, shot, active_model)
+        active_model = fb_model if use_fallback else TTS_MODEL
+        active_voice = fb_voice if use_fallback else sb["tts_voice"]
+        inputs = shot_inputs(sb, shot, active_model, active_voice)
         h = input_hash(inputs)
         cached = cache_lookup(STAGE, sid, h)
-        if not cached and not use_cf:
-            cf_in = shot_inputs(sb, shot, CF_TTS_MODEL)
-            cf_h = input_hash(cf_in)
-            if (cf_c := cache_lookup(STAGE, sid, cf_h)):
-                active_model, inputs, h, cached = CF_TTS_MODEL, cf_in, cf_h, cf_c
+        if not cached and not use_fallback:
+            fb_in = shot_inputs(sb, shot, fb_model, fb_voice)
+            fb_h = input_hash(fb_in)
+            if (fb_c := cache_lookup(STAGE, sid, fb_h)):
+                active_model, active_voice, inputs, h, cached = fb_model, fb_voice, fb_in, fb_h, fb_c
 
         params = {k: v for k, v in inputs.items() if k not in ("stage", "model", "text")} | {"input_hash": h}
         if cached:
@@ -104,7 +144,7 @@ def run(sb: dict | None = None, only: set[str] | None = None) -> dict[str, Path]
         out = narration_path(sid)
         t = Timer()
         try:
-            if not use_cf:
+            if not use_fallback:
                 try:
                     client = client or get_client()
                     with t:
@@ -113,24 +153,24 @@ def run(sb: dict | None = None, only: set[str] | None = None) -> dict[str, Path]
                 except Exception as e:  # noqa: BLE001
                     if not _is_daily_quota_error(e):
                         raise
-                    print(f"  [warn]  {sid}: Gemini TTS quota exhausted; switching to Cloudflare {CF_TTS_MODEL} ({CF_TTS_SPEAKER})")
+                    print(f"  [warn]  {sid}: Gemini TTS quota exhausted; switching to {fb_model} ({fb_voice})")
                     log_run(stage=STAGE, shot_id=sid, model=TTS_MODEL, params=params, latency_ms=t.ms,
                             status="fallback", error=repr(e))
-                    use_cf = True
-                    active_model = CF_TTS_MODEL
-                    inputs = shot_inputs(sb, shot, CF_TTS_MODEL)
+                    use_fallback = True
+                    active_model, active_voice = fb_model, fb_voice
+                    inputs = shot_inputs(sb, shot, fb_model, fb_voice)
                     h = input_hash(inputs)
                     params = {k: v for k, v in inputs.items() if k not in ("stage", "model", "text")} | {"input_hash": h}
-            if use_cf:
+            if use_fallback:
                 with t:
-                    dur = with_retry(max_attempts=5)(_cf_tts_to_wav)(
-                        shot["narration_text"], CF_TTS_SPEAKER, out)
+                    fn = _edge_tts_to_wav if active_model == EDGE_TTS_MODEL else _cf_tts_to_wav
+                    dur = with_retry(max_attempts=5)(fn)(shot["narration_text"], active_voice, out)
 
             cache_store(STAGE, sid, h, out)
             usd = dur * USD_PER_AUDIO_SEC if active_model == TTS_MODEL else 0.0
             log_run(stage=STAGE, shot_id=sid, model=active_model, params=params, latency_ms=t.ms,
                     estimated_usd=usd, audio_sec=round(dur, 2))
-            print(f"  [gen]   {sid} ({dur:.1f}s audio, {active_model}, {t.ms:.0f} ms)")
+            print(f"  [gen]   {sid} ({dur:.1f}s audio, {active_model}/{active_voice}, {t.ms:.0f} ms)")
             if dur > shot["duration_sec"] + 0.5:
                 print(f"  [warn]  {sid}: narration {dur:.1f}s exceeds duration_sec {shot['duration_sec']}")
             results[sid] = out

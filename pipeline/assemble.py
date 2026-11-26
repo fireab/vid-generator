@@ -141,11 +141,16 @@ def _cues(sb: dict) -> list[tuple[float, float, list[str]]]:
     """Split each subtitle into <=2-line chunks and spread them across the real narration span."""
     cues = []
     for shot, start, d in _shot_timeline(sb):
-        text = " ".join(shot["subtitle_en"].split())
-        if not text:
+        raw = shot["subtitle_en"].strip()
+        if not raw:
             continue
-        lines = textwrap.wrap(text, LINE_CHARS, break_long_words=False)
-        chunks = [lines[i:i + MAX_LINES] for i in range(0, len(lines), MAX_LINES)]
+        explicit = [ln.strip() for ln in raw.splitlines() if ln.strip()]
+        if 1 <= len(explicit) <= MAX_LINES and all(len(ln) <= 48 for ln in explicit):
+            chunks = [explicit]
+        else:
+            text = " ".join(raw.split())
+            lines = textwrap.wrap(text, LINE_CHARS, break_long_words=False)
+            chunks = [lines[i:i + MAX_LINES] for i in range(0, len(lines), MAX_LINES)]
         p = narration_path(shot["id"])
         speech = wav_duration(p) if p.exists() else max(1.0, d - 0.3)
         t0, t_end = start + 0.05, min(start + d - 0.05, start + speech + 0.25)
