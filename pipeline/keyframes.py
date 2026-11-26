@@ -43,9 +43,12 @@ def shot_prompt(sb: dict, shot: dict) -> str:
 @with_retry(max_attempts=5)
 def _flux(prompt: str, seed: int) -> bytes:
     acct, token = require_env("CLOUDFLARE_ACCOUNT_ID"), require_env("CLOUDFLARE_API_TOKEN")
+    payload = {"prompt": prompt[:2048], "steps": STEPS}
+    if "flux-1-schnell" not in MODEL:
+        payload["seed"] = seed
     r = requests.post(f"https://api.cloudflare.com/client/v4/accounts/{acct}/ai/run/{MODEL}",
                       headers={"Authorization": f"Bearer {token}"},
-                      json={"prompt": prompt[:2048], "steps": STEPS, "seed": seed}, timeout=120)
+                      json=payload, timeout=120)
     if r.status_code != 200:
         raise RuntimeError(f"Cloudflare {r.status_code}: {r.text[:300]}")
     return base64.b64decode(r.json()["result"]["image"])

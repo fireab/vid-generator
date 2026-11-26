@@ -64,6 +64,7 @@ def run(sb: dict | None = None, only: set[str] | None = None) -> dict[str, Path]
                 print(f"  [warn]  {sid}: narration {dur:.1f}s exceeds duration_sec {shot['duration_sec']}")
             results[sid] = out
         except Exception as e:  # noqa: BLE001
+            print(f"  [err]   {sid}: {e}")
             log_run(stage=STAGE, shot_id=sid, model=TTS_MODEL, params=params, latency_ms=t.ms,
                     status="error", error=repr(e))
             raise

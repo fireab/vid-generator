@@ -20,26 +20,53 @@ def get_client():
     )
 
 
+def _extract_pcm(resp) -> tuple[bytes | None, str]:
+    """Safely extract audio bytes from a GenerateContentResponse, or return (None, diagnostic)."""
+    candidates = getattr(resp, "candidates", None) or []
+    prompt_fb = getattr(resp, "prompt_feedback", None)
+    if not candidates:
+        return None, f"no candidates (prompt_feedback={prompt_fb!r})"
+    cand = candidates[0]
+    finish_reason = getattr(cand, "finish_reason", None)
+    content = getattr(cand, "content", None)
+    parts = getattr(content, "parts", None) if content is not None else None
+    if parts:
+        for part in parts:
+            inline = getattr(part, "inline_data", None)
+            data = getattr(inline, "data", None) if inline is not None else None
+            if data:
+                return data, ""
+    return None, f"empty audio content (finish_reason={finish_reason!r}, prompt_feedback={prompt_fb!r})"
+
+
 def tts_to_wav(client, text: str, voice: str, style: str, out_path: Path, model: str = TTS_MODEL) -> float:
     """Synthesize `text` with style direction into a WAV file. Returns duration in seconds."""
     from google.genai import types
 
-    prompt = f"{style}\n\n{text}" if style else text
-    resp = client.models.generate_content(
-        model=model,
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            response_modalities=["AUDIO"],
-            speech_config=types.SpeechConfig(
-                voice_config=types.VoiceConfig(
-                    prebuilt_voice_config=types.PrebuiltVoiceConfig(voice_name=voice)
-                )
-            ),
+    cfg = types.GenerateContentConfig(
+        response_modalities=["AUDIO"],
+        speech_config=types.SpeechConfig(
+            voice_config=types.VoiceConfig(
+                prebuilt_voice_config=types.PrebuiltVoiceConfig(voice_name=voice)
+            )
         ),
     )
-    pcm = resp.candidates[0].content.parts[0].inline_data.data
+
+    prompts = [f"Read the following aloud in a {style.rstrip('.')} tone:\n{text}"] if style else []
+    prompts.append(text)
+
+    pcm, diag = None, ""
+    for i, prompt in enumerate(prompts):
+        resp = client.models.generate_content(model=model, contents=prompt, config=cfg)
+        pcm, diag = _extract_pcm(resp)
+        if pcm:
+            break
+        if i == 0 and len(prompts) > 1:
+            print(f"  [warn] styled TTS returned {diag}; retrying with plain text")
+
     if not pcm:
-        raise RuntimeError("TTS returned empty audio")
+        raise RuntimeError(f"TTS failed: {diag}")
+
     out_path.parent.mkdir(parents=True, exist_ok=True)
     tmp = out_path.with_suffix(".tmp.wav")
     with wave.open(str(tmp), "wb") as wf:
