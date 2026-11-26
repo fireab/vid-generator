@@ -32,8 +32,9 @@ def _flux():
     token = require_env("CLOUDFLARE_API_TOKEN")
     url = f"https://api.cloudflare.com/client/v4/accounts/{acct}/ai/run/{FLUX_MODEL}"
     r = requests.post(url, headers={"Authorization": f"Bearer {token}"},
-                      json={"prompt": "a small red cube on a white table", "steps": 4, "seed": 42}, timeout=60)
-    r.raise_for_status()
+                      json={"prompt": "a small red cube on a white table", "steps": 4}, timeout=60)
+    if r.status_code != 200:
+        raise RuntimeError(f"Cloudflare {r.status_code}: {r.text[:300]}")
     img = r.json()["result"]["image"]
     SMOKE_DIR.mkdir(parents=True, exist_ok=True)
     (SMOKE_DIR / "flux.jpg").write_bytes(base64.b64decode(img))

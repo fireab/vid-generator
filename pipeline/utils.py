@@ -12,6 +12,7 @@ import hashlib
 import json
 import os
 import random
+import re
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -111,9 +112,20 @@ def clear_cache() -> None:
 
 
 # --------------------------------------------------------------------- retry
+def _retry_after_seconds(exc: BaseException) -> float | None:
+    """Extract server-requested retry delay from 429 error messages (e.g. 'Please retry in 59.1s')."""
+    msg = str(exc)
+    if m := re.search(r"Please retry in\s+([0-9.]+)\s*(ms|s)", msg):
+        val = float(m.group(1))
+        return val / 1000.0 if m.group(2) == "ms" else val
+    if m := re.search(r"retryDelay['\"]?\s*:\s*['\"]?([0-9.]+)s", msg):
+        return float(m.group(1))
+    return None
+
+
 def with_retry(max_attempts: int = 5, base_delay: float = 1.0, max_delay: float = 30.0,
                retry_on: tuple[type[BaseException], ...] = (Exception,)) -> Callable:
-    """Exponential backoff with full jitter."""
+    """Exponential backoff with full jitter, honoring server RetryInfo delays on 429s."""
 
     def deco(fn: Callable) -> Callable:
         @functools.wraps(fn)
@@ -122,10 +134,12 @@ def with_retry(max_attempts: int = 5, base_delay: float = 1.0, max_delay: float 
                 try:
                     return fn(*args, **kwargs)
                 except retry_on as e:  # noqa: PERF203
-                    if attempt == max_attempts:
+                    hint = _retry_after_seconds(e)
+                    if attempt == max_attempts or "PerDay" in str(e) or (hint is not None and hint > 300):
                         raise
-                    delay = min(max_delay, base_delay * 2 ** (attempt - 1))
-                    delay = random.uniform(0, delay)
+                    delay = random.uniform(0, min(max_delay, base_delay * 2 ** (attempt - 1)))
+                    if hint is not None:
+                        delay = min(90.0, max(delay, hint + 1.5))
                     print(f"  [retry] {fn.__name__} attempt {attempt} failed: {e!r}; sleeping {delay:.1f}s")
                     time.sleep(delay)
 

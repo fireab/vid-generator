@@ -1,19 +1,110 @@
 {
-  "title": "The Heritage Short",
-  "style_block": "cinematic 35mm film still, warm golden-hour light, shallow depth of field, rich earthy palette, subtle film grain, 16:9",
-  "character_description": "TODO: an elderly grandmother in her 70s, silver hair under a white cotton shawl, kind deep-set eyes, weathered hands",
+  "title": "The Clay Jebena",
+  "style_block": "cinematic 35mm Kodak Portra film still, warm golden-hour sunlight filtering through smoke, shallow depth of field, rich terracotta and espresso tones, subtle film grain, intimate documentary realism",
+  "character_description": "Emaye, a warm Ethiopian grandmother in her 70s with close-cropped silver hair, kind deep-set dark eyes, gentle laugh lines, weathered hands, wearing a traditional white handwoven cotton netela shawl with a subtle woven gold-and-crimson border",
   "language": "en-US",
   "tts_voice": "Kore",
-  "tts_style": "Speak slowly and warmly, like a grandparent telling a cherished family story by the fire.",
-  "music_cue": "TODO: gentle traditional strings and soft percussion, nostalgic, building slightly toward the end",
+  "tts_style": "warm, unhurried, and intimate, like an elder sharing a cherished memory over morning coffee",
+  "music_cue": "gentle Ethiopian krar and soft washint flute over warm ambient strings, slow 72 BPM, nostalgic and tender, swelling softly in the final 15 seconds",
   "shots": [
-    {"id": "shot_01", "reason": "TODO: establish place and mood", "duration_sec": 6, "narration_text": "TODO: Opening line of narration for shot one.", "subtitle_en": "TODO: Opening line of narration for shot one.", "image_prompt": "TODO: wide establishing shot of a highland village at dawn", "motion_prompt": "slow push-in", "motion_mode": "ken_burns", "seed": 1001},
-    {"id": "shot_02", "reason": "TODO: introduce the protagonist", "duration_sec": 6, "narration_text": "TODO: Narration for shot two.", "subtitle_en": "TODO: Narration for shot two.", "image_prompt": "TODO: medium shot of the grandmother", "motion_prompt": "subtle head turn toward camera", "motion_mode": "wan", "seed": 1002},
-    {"id": "shot_03", "reason": "TODO: reveal the heirloom", "duration_sec": 6, "narration_text": "TODO: Narration for shot three.", "subtitle_en": "TODO: Narration for shot three.", "image_prompt": "TODO: close-up of hands holding an heirloom", "motion_prompt": "slow tilt down", "motion_mode": "ken_burns", "seed": 1003},
-    {"id": "shot_04", "reason": "TODO: flashback begins", "duration_sec": 6, "narration_text": "TODO: Narration for shot four.", "subtitle_en": "TODO: Narration for shot four.", "image_prompt": "TODO: memory scene, younger self", "motion_prompt": "gentle camera drift left", "motion_mode": "wan", "seed": 1004},
-    {"id": "shot_05", "reason": "TODO: conflict or hardship", "duration_sec": 6, "narration_text": "TODO: Narration for shot five.", "subtitle_en": "TODO: Narration for shot five.", "image_prompt": "TODO: dramatic scene of hardship", "motion_prompt": "slow pull-out", "motion_mode": "ken_burns", "seed": 1005},
-    {"id": "shot_06", "reason": "TODO: turning point", "duration_sec": 6, "narration_text": "TODO: Narration for shot six.", "subtitle_en": "TODO: Narration for shot six.", "image_prompt": "TODO: hopeful turning point", "motion_prompt": "figure walks forward", "motion_mode": "wan", "seed": 1006},
-    {"id": "shot_07", "reason": "TODO: return to present, passing on heritage", "duration_sec": 6, "narration_text": "TODO: Narration for shot seven.", "subtitle_en": "TODO: Narration for shot seven.", "image_prompt": "TODO: grandmother hands heirloom to grandchild", "motion_prompt": "slow push-in on hands", "motion_mode": "wan", "seed": 1007},
-    {"id": "shot_08", "reason": "TODO: closing image and message", "duration_sec": 6, "narration_text": "TODO: Closing line of narration.", "subtitle_en": "TODO: Closing line of narration.", "image_prompt": "TODO: village at dusk, closing wide", "motion_prompt": "slow pull-out", "motion_mode": "ken_burns", "seed": 1008}
+    {
+      "id": "shot_01",
+      "reason": "Establish the highland dawn setting and sensory quiet before the ceremony begins",
+      "duration_sec": 7,
+      "narration_text": "Before the sun climbs over the highland ridge, our house always wakes to the scent of green grass and glowing charcoal.",
+      "subtitle_en": "Before the sun climbs the ridge, our house wakes to fresh grass and charcoal.",
+      "image_prompt": "Wide establishing view of a misty Ethiopian highland courtyard at dawn, golden morning light touching an earthen home, fresh green grass scattered across a woven reed mat in the center foreground, wisps of woodsmoke rising softly",
+      "motion_prompt": "slow push-in",
+      "motion_mode": "ken_burns",
+      "seed": 2101
+    },
+    {
+      "id": "shot_02",
+      "reason": "Introduce Emaye in her element, anchoring emotional warmth and visual character consistency",
+      "duration_sec": 8,
+      "narration_text": "My grandmother Emaye never owned a watch. She measured every morning by the crackle of raw coffee beans darkening in an iron pan.",
+      "subtitle_en": "Emaye never owned a watch; she measured dawn by roasting coffee beans.",
+      "image_prompt": "Medium portrait of Emaye seated on a low wooden stool in a sunlit courtyard, gently shaking a dark iron pan of roasting coffee beans over a small clay brazier, soft golden rim light on her white cotton netela shawl",
+      "motion_prompt": "subtle head turn toward camera",
+      "motion_mode": "wan",
+      "seed": 2102
+    },
+    {
+      "id": "shot_03",
+      "reason": "Reveal the central heirloom — the black clay jebena — as the physical symbol of family continuity",
+      "duration_sec": 7,
+      "narration_text": "Beside her sat a black clay jebena, its spout worn smooth by forty years of pouring patience into tiny porcelain cups.",
+      "subtitle_en": "Beside her sat a black clay jebena, worn smooth by forty years of care.",
+      "image_prompt": "Intimate close-up of Emaye's weathered hands holding a traditional round black clay Ethiopian jebena coffee pot over glowing embers, tiny hand-painted porcelain cini cups arranged neatly on a low wooden tray below",
+      "motion_prompt": "slow tilt down",
+      "motion_mode": "ken_burns",
+      "seed": 2103
+    },
+    {
+      "id": "shot_04",
+      "reason": "Evoke memory of community and belonging through the ritual of frankincense smoke",
+      "duration_sec": 8,
+      "narration_text": "When the frankincense rose in silver ribbons, neighbors did not need an invitation. They simply followed the warmth to our doorway.",
+      "subtitle_en": "When frankincense rose, neighbors followed the warmth straight to our door.",
+      "image_prompt": "Medium shot of Emaye placing a pinch of golden frankincense onto glowing embers in a small clay burner, luminous ribbons of fragrant smoke curling upward through a sunbeam in the doorway of an earthen home",
+      "motion_prompt": "gentle camera drift left",
+      "motion_mode": "wan",
+      "seed": 2104
+    },
+    {
+      "id": "shot_05",
+      "reason": "Introduce the tension of departure — leaving the highland home for a distant city",
+      "duration_sec": 8,
+      "narration_text": "Years later, the morning I packed my suitcase for a city across the sea, the room felt too quiet and the road ahead too wide.",
+      "subtitle_en": "The morning I packed for a distant city, the room felt quiet and the road wide.",
+      "image_prompt": "Quiet interior shot of a worn canvas suitcase resting on a woven rug near a wooden doorway looking out onto misty highland hills, morning shadows stretching across the clay floor, muted warm tones",
+      "motion_prompt": "slow pull-out",
+      "motion_mode": "ken_burns",
+      "seed": 2105
+    },
+    {
+      "id": "shot_06",
+      "reason": "Turning point: Emaye's calm reassurance during the final coffee pour",
+      "duration_sec": 8,
+      "narration_text": "Emaye lifted the jebena high, pouring a thin dark arc without spilling a single drop. Wherever you go, she whispered, never rush the first cup.",
+      "subtitle_en": "She poured a thin dark arc: Wherever you go, never rush the first cup.",
+      "image_prompt": "Medium close-up of Emaye lifting the black clay jebena gracefully high to pour a thin, glistening stream of dark coffee into a small porcelain cup, steam rising in warm golden-hour backlight",
+      "motion_prompt": "slow push-in",
+      "motion_mode": "wan",
+      "seed": 2106
+    },
+    {
+      "id": "shot_07",
+      "reason": "Emotional peak: passing the heirloom clay jebena from elder hands to younger hands",
+      "duration_sec": 8,
+      "narration_text": "Before I stepped onto the gravel road, she wrapped the clay pot in a folded cotton cloth and pressed it gently into my hands.",
+      "subtitle_en": "She wrapped the clay pot in cotton cloth and pressed it into my hands.",
+      "image_prompt": "Close-up of Emaye's weathered hands wrapping the black clay jebena in a clean white woven cotton netela and gently placing it into the outstretched hands of her young granddaughter, warm golden sunlight illuminating their hands",
+      "motion_prompt": "slow push-in on hands",
+      "motion_mode": "wan",
+      "seed": 2107
+    },
+    {
+      "id": "shot_08",
+      "reason": "Bridge past and present: showing the tradition alive in a new city apartment",
+      "duration_sec": 7,
+      "narration_text": "Now, oceans away, whenever the winter light turns gray, I roast a handful of beans and listen for the old familiar crackle.",
+      "subtitle_en": "Now, oceans away, I roast a handful of beans and listen for that crackle.",
+      "image_prompt": "Warm interior of a modern city apartment window at dusk, the same traditional black clay jebena and two small porcelain cups steaming on a wooden table in the center foreground, soft city lights blurred outside the window",
+      "motion_prompt": "pan right",
+      "motion_mode": "ken_burns",
+      "seed": 2108
+    },
+    {
+      "id": "shot_09",
+      "reason": "Closing visual resonance and lasting feeling of pride, warmth, and carried heritage",
+      "duration_sec": 7,
+      "narration_text": "Home is not only the ground you leave behind. It is every quiet ritual you carry forward.",
+      "subtitle_en": "Home is not only where you leave. It is every quiet ritual you carry forward.",
+      "image_prompt": "Wide serene closing shot of the Ethiopian highland village bathed in amber sunset light, gentle golden clouds above the ridges, peaceful and timeless horizon",
+      "motion_prompt": "slow pull-out",
+      "motion_mode": "ken_burns",
+      "seed": 2109
+    }
   ]
 }
