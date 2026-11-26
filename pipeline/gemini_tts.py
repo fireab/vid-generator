@@ -14,7 +14,10 @@ def get_client():
 
     from utils import require_env
 
-    return genai.Client(api_key=require_env("GEMINI_API_KEY"))
+    return genai.Client(
+        api_key=require_env("GEMINI_API_KEY"),
+        http_options={"api_version": "v1beta"},
+    )
 
 
 def tts_to_wav(client, text: str, voice: str, style: str, out_path: Path, model: str = TTS_MODEL) -> float:
